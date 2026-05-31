@@ -28,16 +28,21 @@ async function runTests() {
     const totalTests = 3;
 
     try {
-        // 1. Nettoyer et recréer les dossiers de test
+        // 1. Nettoyer le dossier de sortie et s'assurer que les dossiers existent
         await fs.mkdir(fixturesDir, { recursive: true });
         await fs.mkdir(outputDir, { recursive: true });
-        await clearDirectory(fixturesDir);
         await clearDirectory(outputDir);
 
-        // 2. Copier uniquement le fichier circle.dwg original
-        const sampleSource = path.join(__dirname, '..', 'libredwg', 'test', 'test-data', '2000', 'circle.dwg');
-        await fs.copyFile(sampleSource, circleDwgPath);
-        console.log("📂 Dossiers nettoyés. Fichier 'circle.dwg' copié dans 'fixtures/'.\n");
+        // 2. S'assurer que le fichier circle.dwg est présent dans fixtures/
+        try {
+            await fs.access(circleDwgPath);
+        } catch (err) {
+            // S'il est manquant localement, tenter de le copier depuis le submodule LibreDWG
+            const sampleSource = path.join(__dirname, '..', 'libredwg', 'test', 'test-data', '2000', 'circle.dwg');
+            await fs.copyFile(sampleSource, circleDwgPath);
+            console.log("📂 Fichier 'circle.dwg' copié depuis LibreDWG dans 'fixtures/'.");
+        }
+        console.log("📂 Dossier de sortie 'output/' nettoyé.\n");
 
         // =========================================================
         // TEST 1 — Chargement Wasm
