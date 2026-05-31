@@ -32,6 +32,23 @@ const { convertDwgToDxf } = require('dwg2dxf-converter');
 })();
 ```
 
+### TypeScript / ES Modules
+
+This package includes native, first-class TypeScript typings (`index.d.ts`). You can import and use it in TS / ES Modules directly:
+
+```typescript
+import { convertDwgToDxf, ConversionResult } from 'dwg2dxf-converter';
+
+async function main() {
+    const result: ConversionResult = await convertDwgToDxf('./plan.dwg', './plan.dxf');
+    if (result.success) {
+        console.log(`DXF generated successfully. Size: ${result.fileSize} bytes.`);
+    } else {
+        console.error(`Conversion failed: ${result.error}`);
+    }
+}
+```
+
 ## Advanced Usage
 
 For complete handling in an asynchronous environment (e.g., a backend API):

@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "Convert DWG files to DXF using Node.js, 100% standalone via WebAssembly and GNU LibreDWG.",
   "main": "index.js",
+  "types": "index.d.ts",
   "engines": {
     "node": ">=18"
   },
@@ -14,7 +15,8 @@
   "files": [
     "wasm/",
     "lib/",
-    "index.js"
+    "index.js",
+    "index.d.ts"
   ],
   "keywords": [
     "dwg",
