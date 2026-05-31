@@ -1,0 +1,39 @@
+{
+  "name": "dwg2dxf",
+  "version": "1.0.0",
+  "description": "Convertit des fichiers DWG en DXF avec Node.js, 100% autonome en WebAssembly via GNU LibreDWG.",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "bash ./scripts/build-wasm.sh",
+    "test": "node test/test.js",
+    "prepublishOnly": "node -e \"if (!require('fs').existsSync('wasm/libredwg.wasm')) { console.error('Build required avant publication !'); process.exit(1); }\""
+  },
+  "files": [
+    "wasm/",
+    "lib/",
+    "index.js"
+  ],
+  "keywords": [
+    "dwg",
+    "dxf",
+    "autocad",
+    "libredwg",
+    "cad",
+    "conversion",
+    "wasm",
+    "webassembly"
+  ],
+  "author": "JosephESSEY",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JosephESSEY/dwg2dxf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JosephESSEY/dwg2dxf/issues"
+  },
+  "homepage": "https://github.com/JosephESSEY/dwg2dxf#readme"
+}

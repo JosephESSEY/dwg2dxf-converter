@@ -1,0 +1,11 @@
+node_modules/
+wasm/libredwg.wasm
+wasm/libredwg.js
+libredwg/
+*.o
+*.a
+*.bc
+.DS_Store
+*.sh
+*.ps1
+test/output/

@@ -1,0 +1,6 @@
+scripts/
+libredwg/
+test/
+*.sh
+*.ps1
+.gitignore
