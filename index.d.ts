@@ -26,10 +26,14 @@ export interface ConversionResult {
      * Detailed error message if the conversion failed, otherwise null.
      */
     error: string | null;
+    /**
+     * Array of warning messages if non-critical issues occurred, otherwise null.
+     */
+    warnings: string[] | null;
 }
 
 /**
- * Converts a DWG file to DXF format using the standalone WebAssembly LibreDWG engine.
+ * Converts a single DWG file to DXF format using the standalone WebAssembly LibreDWG engine.
  * 
  * @param inputPath Absolute or relative path to the input .dwg file.
  * @param outputPath Destination path for the generated .dxf file.
@@ -40,6 +44,19 @@ export function convertDwgToDxf(
     outputPath: string,
     options?: ConversionOptions
 ): Promise<ConversionResult>;
+
+/**
+ * Converts multiple DWG files to DXF format in a target directory.
+ * 
+ * @param inputPaths Array of absolute or relative paths to input .dwg files.
+ * @param outputDir Destination directory for the generated .dxf files.
+ * @param options Options for the conversion.
+ */
+export function convertDwgToDxf(
+    inputPaths: string[],
+    outputDir: string,
+    options?: ConversionOptions
+): Promise<ConversionResult[]>;
 
 /**
  * Verifies if the WebAssembly module loads correctly in the environment.

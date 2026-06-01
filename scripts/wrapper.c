@@ -11,9 +11,9 @@ int convert_dwg_to_dxf(const char* in_file, const char* out_file) {
     memset(&dwg, 0, sizeof(Dwg_Data));
 
     // Read DWG
-    int error = dwg_read_file(in_file, &dwg);
-    if (error >= DWG_ERR_CRITICAL) {
-        return error;
+    int read_error = dwg_read_file(in_file, &dwg);
+    if (read_error >= DWG_ERR_CRITICAL) {
+        return read_error;
     }
 
     // Prepare for DXF writing
@@ -27,10 +27,15 @@ int convert_dwg_to_dxf(const char* in_file, const char* out_file) {
     }
 
     // Write DXF
-    error = dwg_write_dxf(&dat, &dwg);
+    int write_error = dwg_write_dxf(&dat, &dwg);
     
     fclose(dat.fh);
     dwg_free(&dwg);
 
-    return error >= DWG_ERR_CRITICAL ? error : 0;
+    if (write_error >= DWG_ERR_CRITICAL) {
+        return write_error;
+    }
+
+    // Return the read error if it had warnings, otherwise the write error (if any), otherwise 0.
+    return read_error != 0 ? read_error : (write_error >= 0 ? write_error : 0);
 }

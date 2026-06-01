@@ -12,9 +12,13 @@
     "test": "node test/test.js",
     "prepublishOnly": "node -e \"if (!require('fs').existsSync('wasm/libredwg.wasm')) { console.error('Build required avant publication !'); process.exit(1); }\""
   },
+  "bin": {
+    "dwg2dxf-converter": "bin/cli.js"
+  },
   "files": [
     "wasm/",
     "lib/",
+    "bin/",
     "index.js",
     "index.d.ts",
     "logo/"
@@ -34,13 +38,20 @@
     "webassembly",
     "dwg-parser",
     "dxf-converter",
-    "cad-file-converter",
-    "dwg-reader",
-    "autocad-dwg",
+    "nodejs",
+    "node",
+    "standalone",
+    "offline",
+    "no-dependencies",
     "r14",
+    "r2000",
+    "r2018",
     "surveying",
-    "gis"
+    "gis",
+    "bim",
+    "typescript"
   ],
+  "libredwg": "0.13.4",
   "author": "JosephESSEY",
   "license": "MIT",
   "repository": {

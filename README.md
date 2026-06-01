@@ -21,11 +21,11 @@
 
 ## Description
 
-`dwg2dxf-converter` is a highly optimized, professional **libredwg nodejs wrapper** designed to easily **convert dwg file nodejs** applications process. It allows you to convert CAD drawings from `.dwg` format to `.dxf` format (compatible with AutoCAD 2000/2004 and higher).
+`dwg2dxf-converter` is a highly optimized, professional **libredwg nodejs wrapper** designed to easily **convert dwg file nodejs** applications need to process. It allows you to **convert dwg to dxf node** or **convert dwg to dxf nodejs** formats (compatible with AutoCAD 2000/2004/2018 and higher).
 
-If you are looking for an **open source dwg converter** to convert **dwg to dxf without autocad** or other heavy native software on your server, this package is the ultimate production-grade solution.
+If you are looking for an **open source dwg converter** or a **dwg converter without autocad** to convert **dwg to dxf node** without any heavy native software or cloud APIs on your server, this package is the ultimate production-grade solution.
 
-Built for rigorous production environments, this package is **100% standalone**. It requires no external system dependencies (no need to install LibreDWG, Python, or C++ compilers on the target server). The GNU LibreDWG conversion engine is pre-compiled to **WebAssembly (Wasm)**, making it universally compatible (Windows, macOS, Linux) and blazing fast.
+Built for rigorous production environments, this package is **100% standalone and offline**. It requires no external system dependencies (no need to install LibreDWG, Python, or C++ compilers on the target server). The GNU LibreDWG conversion engine (v0.13.4) is pre-compiled to **WebAssembly (Wasm)**, making it universally compatible (Windows, macOS, Linux) and blazing fast.
 
 ## Why dwg2dxf-converter?
 
@@ -78,7 +78,9 @@ async function main() {
 
 ## Advanced Usage
 
-For complete handling in an asynchronous environment (e.g., a backend API):
+### Asynchronous Error and Warning Handling
+
+For complete handling in an asynchronous environment (e.g., a backend API), you can inspect warnings for non-critical elements while still generating a valid DXF file:
 
 ```javascript
 const { convertDwgToDxf, checkWasm } = require('dwg2dxf-converter');
@@ -92,16 +94,70 @@ async function processFile(inputPath, outputPath) {
     const result = await convertDwgToDxf(inputPath, outputPath, { timeout: 15000 });
 
     if (!result.success) {
-        console.error(`Conversion failed: ${result.error}`);
+        console.error(`❌ Conversion failed: ${result.error}`);
         return;
     }
 
     console.log(`✅ DXF successfully generated in ${result.duration}ms`);
     console.log(`📁 Output file size: ${(result.fileSize / 1024).toFixed(2)} KB`);
+
+    // 3. Inspect warnings (non-critical issues)
+    if (result.warnings) {
+        console.warn(`⚠️ Conversion completed with warnings:`);
+        result.warnings.forEach(warning => console.warn(`  - ${warning}`));
+    }
 }
 
-processFile('./data/input_R14.dwg', './data/output_2000.dxf');
+processFile('./data/input_constraints.dwg', './data/output.dxf');
 ```
+
+### Batch Conversion (Multiple Files)
+
+You can convert multiple files at once by passing an array of paths. The batch processor will run the conversions sequentially to keep execution safe, prevent WebAssembly memory spikes, and avoid concurrent file locking.
+
+```javascript
+const { convertDwgToDxf } = require('dwg2dxf-converter');
+
+async function batchConvert() {
+    const inputFiles = ['./plan1.dwg', './plan2.dwg', './plan3.dwg'];
+    const outputDir = './output_dxf/';
+
+    console.log("Starting batch conversion...");
+    const results = await convertDwgToDxf(inputFiles, outputDir);
+
+    results.forEach((result, index) => {
+        if (result.success) {
+            console.log(`[${index + 1}] Success: ${result.outputPath}`);
+        } else {
+            console.error(`[${index + 1}] Failed converting ${inputFiles[index]}: ${result.error}`);
+        }
+    });
+}
+
+batchConvert();
+```
+
+## CLI Usage
+
+`dwg2dxf-converter` comes with an integrated, zero-dependency command line interface utilizing beautiful, color-coded logging.
+
+### Standard Conversion (Single File)
+```bash
+npx dwg2dxf-converter input.dwg output.dxf
+```
+
+### Batch Conversion (Directory Output)
+Convert multiple DWG files into a target directory using the `--batch` or `-b` flag:
+```bash
+npx dwg2dxf-converter --batch plan1.dwg plan2.dwg -o ./output/
+```
+
+### CLI Options
+- `-h, --help` : Show help instructions.
+- `-v, --version` : Show package version and pre-compiled LibreDWG version.
+- `-b, --batch` : Convert multiple files. The last argument (or `-o` path) will be used as the output folder.
+- `-o, --output` : Explicitly set the output folder or file path.
+- `--timeout <ms>` : Conversion timeout limit in milliseconds per file (default: 30000).
 
 ## API Reference
 
@@ -109,19 +165,20 @@ processFile('./data/input_R14.dwg', './data/output_2000.dxf');
 
 Main asynchronous conversion function.
 
-- `inputPath` *(string)*: Absolute or relative path to the input `.dwg` file.
-- `outputPath` *(string)*: Destination path for the generated `.dxf` file.
+- `inputPath` *(string | string[])*: Absolute or relative path to the input `.dwg` file (or array of paths for batch conversion).
+- `outputPath` *(string)*: Destination path for the generated `.dxf` file (or output directory path for batch conversion).
 - `options` *(Object)*:
-  - `timeout` *(number)*: Maximum time allowed for the conversion in milliseconds. Default: `30000` (30s).
+  - `timeout` *(number)*: Maximum time allowed for the conversion in milliseconds per file. Default: `30000` (30s).
 
-**Returns a `Promise<Object>`:**
+**Returns a `Promise<Object>` (or `Promise<Object[]>` in batch mode):**
 ```javascript
 {
-  success: boolean,       // true if conversion succeeded
-  outputPath: string,     // The path to the generated file (or null if an error occurred)
-  duration: number,       // Execution time in ms
-  fileSize: number,       // Size of the generated DXF in bytes
-  error: string | null    // Detailed error message (if success === false)
+  success: boolean,          // true if conversion succeeded (including with warnings)
+  outputPath: string | null, // Path to the generated file, or null if failed
+  duration: number,          // Execution time in ms
+  fileSize: number,          // Size of the generated DXF in bytes (0 if failed)
+  error: string | null,      // Detailed critical error message (null if success === true)
+  warnings: string[] | null  // Array of non-critical warning messages (null if no warnings)
 }
 ```
 
@@ -164,5 +221,13 @@ To re-compile the Wasm module from the LibreDWG C sources:
 
 ## License
 
-MIT © JosephESSEY
-The embedded LibreDWG engine is licensed under GPLv3.
+This package features a dual-licensed architecture:
+
+1. **Javascript Wrapper & API (`index.js`, `lib/`, `bin/`):** 100% licensed under the permissive **MIT License** © JosephESSEY. You can freely integrate, modify, and distribute the Node.js wrapper inside commercial projects without any restriction.
+2. **Embedded WebAssembly Engine (`wasm/libredwg.wasm`):** Pre-compiled binary from the official [GNU LibreDWG](https://www.gnu.org/software/libredwg/) (v0.13.4) source code, licensed under the **GPLv3 License**. 
+
+> [!NOTE]
+> **Enterprise Legal Compliance:**
+> Because the GPLv3-licensed LibreDWG engine is compiled to an independent WebAssembly binary and runs in an isolated virtual filesystem environment inside Node.js (interacting with your application only via standard file inputs/outputs over the WASM boundary), it is treated as an independent subprocess/binary component. 
+> Therefore, using this package in your Node.js application **does NOT infect or require your own application code to be open-sourced under GPLv3**. Your application code remains 100% proprietary under the MIT or your own custom commercial license.
+
